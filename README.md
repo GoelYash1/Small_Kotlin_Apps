@@ -1,2 +1,2 @@
-# JetpackApps
- Apps made with Jetpack Compose
+# Apps
+These apps are made to improve my skills and to test my knowledge
