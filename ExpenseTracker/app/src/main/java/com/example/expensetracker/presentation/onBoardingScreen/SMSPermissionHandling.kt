@@ -1,6 +1,7 @@
 package com.example.expensetracker.presentation.onBoardingScreen
 
 import android.Manifest
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,8 @@ fun SMSPermissionHandling(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
+    val sharedPreferences = LocalContext.current.getSharedPreferences("MySharedPreferences", Context.MODE_PRIVATE)
+    val permissionGrantedToastShown = sharedPreferences.getBoolean("permissionGrantedToastShown",false)
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(key1 = lifecycleOwner, effect = {
@@ -71,7 +74,10 @@ fun SMSPermissionHandling(
 
     LaunchedEffect(permissionState.hasPermission, permissionState.shouldShowRationale) {
         if (permissionState.hasPermission) {
-            Toast.makeText(context, "Reading SMS permission is granted", Toast.LENGTH_SHORT).show()
+            if (!permissionGrantedToastShown){
+                Toast.makeText(context, "SMS permission has been granted", Toast.LENGTH_SHORT).show()
+                sharedPreferences.edit().putBoolean("permissionGrantedToastShown",true).apply()
+            }
             mainNavController.navigate(Home.route)
         }
     }
