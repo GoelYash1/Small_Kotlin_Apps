@@ -48,20 +48,23 @@ fun SMSPermissionHandling(
     val coroutineScope = rememberCoroutineScope()
 
     val sharedPreferences = LocalContext.current.getSharedPreferences("MySharedPreferences", Context.MODE_PRIVATE)
-    val permissionGrantedToastShown = sharedPreferences.getBoolean("permissionGrantedToastShown",false)
+    val permissionGrantedToastShown = sharedPreferences.getBoolean("permissionGrantedToastShown", false)
+    val permissionDialogCanceled = sharedPreferences.getBoolean("permissionDialogCanceled", false)
+
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(key1 = lifecycleOwner, effect = {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_START -> {
-                    if (!permissionState.hasPermission && !permissionState.shouldShowRationale && !permissionState.permissionRequested){
+                    if (!permissionState.hasPermission && !permissionState.shouldShowRationale && !permissionState.permissionRequested && !permissionDialogCanceled) {
                         permissionState.launchPermissionRequest()
                     }
                 }
-
                 else -> {
-
+                    if(permissionDialogCanceled){
+                        mainNavController.navigate(Home.route)
+                    }
                 }
             }
         }
@@ -74,9 +77,9 @@ fun SMSPermissionHandling(
 
     LaunchedEffect(permissionState.hasPermission, permissionState.shouldShowRationale) {
         if (permissionState.hasPermission) {
-            if (!permissionGrantedToastShown){
+            if (!permissionGrantedToastShown) {
                 Toast.makeText(context, "SMS permission has been granted", Toast.LENGTH_SHORT).show()
-                sharedPreferences.edit().putBoolean("permissionGrantedToastShown",true).apply()
+                sharedPreferences.edit().putBoolean("permissionGrantedToastShown", true).apply()
             }
             mainNavController.navigate(Home.route)
         }
@@ -91,11 +94,12 @@ fun SMSPermissionHandling(
     }
 
     when {
-        permissionState.shouldShowRationale -> {
+        permissionState.shouldShowRationale && !permissionDialogCanceled -> {
             // Show rationale in an AlertDialog
             AlertDialog(
                 onDismissRequest = {
                     // Navigate to the main screen when dismissed
+                    sharedPreferences.edit().putBoolean("permissionDialogCanceled", true).apply()
                     mainNavController.navigate(Home.route)
                 },
                 title = {
@@ -125,6 +129,7 @@ fun SMSPermissionHandling(
                         Button(
                             onClick = {
                                 // Navigate to the main screen when dismissed
+                                sharedPreferences.edit().putBoolean("permissionDialogCanceled", true).apply()
                                 mainNavController.navigate(Home.route)
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
@@ -138,6 +143,7 @@ fun SMSPermissionHandling(
         }
     }
 }
+
 
 
 
