@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,9 +29,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 
 @Composable
-fun OnBoardingScreen() {
+fun OnBoardingScreen(
+    mainNavController: NavHostController
+) {
     val onBoardingItems = GetOnBoardingItemList()
     var currentItemIndex by remember { mutableStateOf(0) }
     var onBoardingCompleted by remember { mutableStateOf(false) }
@@ -41,8 +45,8 @@ fun OnBoardingScreen() {
             .fillMaxSize()
     ) {
         if (onBoardingCompleted) {
+            SMSPermissionHandling(mainNavController)
             // Navigate to the next screen
-            // Replace with your navigation code here
         } else {
             UpperOnBoardingPanel(onBoardingItems, currentItemIndex)
             LowerOnBoardingPanel(
@@ -127,6 +131,13 @@ fun LowerOnBoardingPanel(
                             }
                         }
                 )
+            }
+            Button(
+                onClick = {
+                    onBoardingCompleted(true)
+                }
+            ) {
+                Text(text = "Skip")
             }
         }
     }
