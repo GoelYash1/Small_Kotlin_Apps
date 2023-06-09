@@ -142,7 +142,9 @@ fun LowerOnBoardingPanel(
                         }
                 )
             }
-            Spacer(modifier = Modifier.padding(10.dp))
+            Spacer(
+                modifier = Modifier.padding(10.dp)
+            )
             Button(
                 onClick = {
                     onBoardingCompleted(true)
