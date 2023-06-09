@@ -16,3 +16,9 @@ object OnBoarding: Destinations{
     override val icon = R.drawable.ic_home
     override val title = "OnBoarding"
 }
+
+object Transactions: Destinations{
+    override val route = "Transactions"
+    override val icon = R.drawable.ic_transactions
+    override val title = "Transactions"
+}

@@ -21,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,32 +38,27 @@ import androidx.navigation.NavHostController
 
 @Composable
 fun OnBoardingScreen(
-    mainNavController: NavHostController
+    mainNavController: NavHostController,
+    onBoardingCompleted: MutableState<Boolean>
 ) {
     val onBoardingItems = GetOnBoardingItemList()
     var currentItemIndex by remember { mutableStateOf(0) }
     val sharedPreferences = LocalContext.current.getSharedPreferences("MySharedPreferences", Context.MODE_PRIVATE)
-    var onBoardingCompleted by remember {
-        mutableStateOf(
-            sharedPreferences.getBoolean("onBoardingCompleted", false)
-        )
-    }
 
     Column(
         Modifier
             .padding(20.dp)
             .fillMaxSize()
     ) {
-        if (onBoardingCompleted) {
+        if (onBoardingCompleted.value) {
             SMSPermissionHandling(mainNavController)
-            // Navigate to the next screen
         } else {
             UpperOnBoardingPanel(onBoardingItems, currentItemIndex)
             LowerOnBoardingPanel(
                 onBoardingItems,
                 currentItemIndex,
                 onBoardingCompleted = { completed ->
-                    onBoardingCompleted = completed
+                    onBoardingCompleted.value = completed
                     sharedPreferences.edit().putBoolean("onBoardingCompleted", completed).apply()
                 },
                 onNextClick = { currentItemIndex++ },
@@ -71,6 +67,7 @@ fun OnBoardingScreen(
         }
     }
 }
+
 
 
 @Composable
@@ -145,6 +142,7 @@ fun LowerOnBoardingPanel(
                         }
                 )
             }
+            Spacer(modifier = Modifier.padding(10.dp))
             Button(
                 onClick = {
                     onBoardingCompleted(true)
