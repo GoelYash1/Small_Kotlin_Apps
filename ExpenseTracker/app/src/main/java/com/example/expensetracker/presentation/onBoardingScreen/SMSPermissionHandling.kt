@@ -91,9 +91,7 @@ fun SMSPermissionHandling(
             // Show rationale in an AlertDialog
             AlertDialog(
                 onDismissRequest = {
-                    // Navigate to the main screen when dismissed
-                    sharedPreferences.edit().putBoolean("permissionDialogCanceled", true).apply()
-                    mainNavController.navigate(Home.route)
+                    // do nothing
                 },
                 title = {
                     Text(text = "Permission Required")
