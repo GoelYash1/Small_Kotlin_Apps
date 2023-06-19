@@ -1,8 +1,6 @@
 package com.example.expensetracker.presentation.onBoardingScreen
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,16 +32,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.expensetracker.Home
 
 @Composable
 fun OnBoardingScreen(
-    mainNavController: NavHostController,
-    onBoardingCompleted: MutableState<Boolean>
+    mainNavController: NavHostController
 ) {
-    val onBoardingItems = GetOnBoardingItemList()
+    val onBoardingItems = getOnBoardingItemList()
     var currentItemIndex by remember { mutableStateOf(0) }
     val sharedPreferences = LocalContext.current.getSharedPreferences("MySharedPreferences", Context.MODE_PRIVATE)
-
+    val onBoardingCompleted = remember {
+        mutableStateOf(
+            sharedPreferences.getBoolean("onBoardingCompleted", false)
+        )
+    }
     Column(
         Modifier
             .padding(20.dp)
@@ -57,9 +58,9 @@ fun OnBoardingScreen(
             LowerOnBoardingPanel(
                 onBoardingItems,
                 currentItemIndex,
-                onBoardingCompleted = { completed ->
+                setOnBoardingCompleted = { completed ->
                     onBoardingCompleted.value = completed
-                    sharedPreferences.edit().putBoolean("onBoardingCompleted", completed).apply()
+                    sharedPreferences.edit().putBoolean("onBoardingCompleted",completed).apply()
                 },
                 onNextClick = { currentItemIndex++ },
                 onPreviousClick = { currentItemIndex-- }
@@ -67,8 +68,6 @@ fun OnBoardingScreen(
         }
     }
 }
-
-
 
 @Composable
 fun UpperOnBoardingPanel(onBoardingItems: List<OnBoardingItem>, currentItemIndex: Int) {
@@ -89,7 +88,7 @@ fun UpperOnBoardingPanel(onBoardingItems: List<OnBoardingItem>, currentItemIndex
 fun LowerOnBoardingPanel(
     onBoardingItems: List<OnBoardingItem>,
     currentItemIndex: Int,
-    onBoardingCompleted: (Boolean) -> Unit,
+    setOnBoardingCompleted: (Boolean) -> Unit,
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit
 ) {
@@ -135,7 +134,7 @@ fun LowerOnBoardingPanel(
                     modifier = Modifier
                         .clickable {
                             if (currentItemIndex == onBoardingItems.lastIndex) {
-                                onBoardingCompleted(true)
+                                setOnBoardingCompleted(true)
                             } else {
                                 onNextClick()
                             }
@@ -147,7 +146,7 @@ fun LowerOnBoardingPanel(
             )
             Button(
                 onClick = {
-                    onBoardingCompleted(true)
+                    setOnBoardingCompleted(true)
                 }
             ) {
                 Text(text = "Skip")
@@ -155,4 +154,3 @@ fun LowerOnBoardingPanel(
         }
     }
 }
-

@@ -3,6 +3,8 @@ package com.example.expensetracker
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,10 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.expensetracker.presentation.mainScreen.MainScreen
 import com.example.expensetracker.presentation.onBoardingScreen.OnBoardingScreen
-import com.example.expensetracker.presentation.transactions.TransactionScreen
+import com.example.expensetracker.presentation.mainScreen.transactions.TransactionScreen
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,31 +39,17 @@ class MainActivity : ComponentActivity() {
                         .getBoolean("onBoardingCompleted", false)
                 )
             }
-            var mainNavController = rememberNavController()
-            if (onBoardingCompleted.value) {
-                Scaffold(
-                    topBar = {
-                        MainTopBar()
-                    },
-                    bottomBar = {
-                        MainBottomNavigation(navController = mainNavController)
-                    }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(it)
-                    ) {
-                        MainNavigation(mainNavController,onBoardingCompleted)
+            val mainNavController = rememberNavController()
+
+            LaunchedEffect(key1 = onBoardingCompleted.value) {
+                if (onBoardingCompleted.value) {
+                    mainNavController.navigate(Main.route) {
+                        popUpTo(OnBoarding.route) { inclusive = true }
                     }
                 }
             }
-            else {
-                OnBoardingScreen(
-                    mainNavController = mainNavController,
-                    onBoardingCompleted = onBoardingCompleted
-                )
-            }
+
+            MainNavigation(mainNavController = mainNavController)
         }
     }
 }
@@ -66,23 +57,42 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainNavigation(
-    mainNavController: NavHostController,
-    onBoardingCompleted: MutableState<Boolean>
-){
+    mainNavController: NavHostController
+) {
+    val backStackEntry = mainNavController.currentBackStackEntryAsState()
+    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
+    DisposableEffect(backStackEntry.value) {
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (backStackEntry.value?.destination?.route == Main.route) {
+                    // Block back press when on MainScreen
+                } else {
+                    isEnabled = false
+                    mainNavController.popBackStack()
+                }
+            }
+        }
+
+        onBackPressedDispatcher?.addCallback(callback)
+
+        onDispose {
+            callback.remove()
+        }
+    }
+
     NavHost(
         navController = mainNavController,
         startDestination = OnBoarding.route
-    ){
-        composable(OnBoarding.route){
-            OnBoardingScreen(mainNavController,onBoardingCompleted)
+    ) {
+        composable(OnBoarding.route) {
+            OnBoardingScreen(mainNavController)
         }
-        composable(Home.route){
+        composable(Main.route) {
             MainScreen()
-        }
-        composable(Transactions.route){
-            TransactionScreen()
         }
     }
 }
+
 
 

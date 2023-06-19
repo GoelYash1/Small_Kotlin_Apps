@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
-import com.example.expensetracker.Home
+import com.example.expensetracker.Main
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
@@ -37,8 +38,10 @@ fun SMSPermissionHandling(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    val sharedPreferences = LocalContext.current.getSharedPreferences("MySharedPreferences", Context.MODE_PRIVATE)
-    val permissionGrantedToastShown = sharedPreferences.getBoolean("permissionGrantedToastShown", false)
+    val sharedPreferences =
+        LocalContext.current.getSharedPreferences("MySharedPreferences", Context.MODE_PRIVATE)
+    val permissionGrantedToastShown =
+        sharedPreferences.getBoolean("permissionGrantedToastShown", false)
     val permissionDialogCanceled = sharedPreferences.getBoolean("permissionDialogCanceled", false)
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -52,8 +55,8 @@ fun SMSPermissionHandling(
                     }
                 }
                 else -> {
-                    if(permissionDialogCanceled){
-                        mainNavController.navigate(Home.route)
+                    if (permissionDialogCanceled) {
+                        mainNavController.navigate(Main.route)
                     }
                 }
             }
@@ -68,12 +71,13 @@ fun SMSPermissionHandling(
     LaunchedEffect(permissionState.hasPermission, permissionState.shouldShowRationale) {
         if (permissionState.hasPermission) {
             if (!permissionGrantedToastShown) {
-                Toast.makeText(context, "SMS permission has been granted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "SMS permission has been granted", Toast.LENGTH_SHORT)
+                    .show()
                 sharedPreferences.edit().putBoolean("permissionGrantedToastShown", true).apply()
             }
-            mainNavController.navigate(Home.route)
+            mainNavController.navigate(Main.route)
         } else if (!permissionState.shouldShowRationale && permissionState.permissionRequested) {
-            mainNavController.navigate(Home.route)
+            mainNavController.navigate(Main.route)
         }
     }
 
@@ -81,7 +85,7 @@ fun SMSPermissionHandling(
     LaunchedEffect(permissionState.permissionRequested) {
         if (permissionState.permissionRequested && !permissionState.hasPermission && !permissionState.shouldShowRationale) {
             coroutineScope.launch {
-                mainNavController.navigate(Home.route)
+                mainNavController.navigate(Main.route)
             }
         }
     }
@@ -120,8 +124,9 @@ fun SMSPermissionHandling(
                         Button(
                             onClick = {
                                 // Navigate to the main screen when dismissed
-                                sharedPreferences.edit().putBoolean("permissionDialogCanceled", true).apply()
-                                mainNavController.navigate(Home.route)
+                                sharedPreferences.edit()
+                                    .putBoolean("permissionDialogCanceled", true).apply()
+                                mainNavController.navigate(Main.route)
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                         ) {
@@ -134,8 +139,5 @@ fun SMSPermissionHandling(
         }
     }
 }
-
-
-
 
 

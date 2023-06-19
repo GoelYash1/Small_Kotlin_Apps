@@ -8,7 +8,7 @@ data class OnBoardingItem(
     val description: String
 )
 
-fun GetOnBoardingItemList(): List<OnBoardingItem> {
+fun getOnBoardingItemList(): List<OnBoardingItem> {
     return listOf(
         OnBoardingItem(
             onBoardingImage = R.drawable.onbg1,

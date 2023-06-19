@@ -11,6 +11,11 @@ object Home: Destinations{
     override val icon = R.drawable.ic_home
     override val title = "Home"
 }
+object Main: Destinations{
+    override val route = "Main"
+    override val icon = R.drawable.ic_home
+    override val title = "Main"
+}
 object OnBoarding: Destinations{
     override val route = "OnBoarding"
     override val icon = R.drawable.ic_home

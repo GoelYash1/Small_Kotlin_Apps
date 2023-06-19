@@ -1,4 +1,4 @@
-package com.example.expensetracker.presentation.transactions
+package com.example.expensetracker.presentation.mainScreen.transactions
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
