@@ -18,9 +18,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 
 @Composable
-fun MainTopBar(){
+fun MainTopBar(mainScreenNavController: NavHostController){
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -41,7 +42,7 @@ fun MainTopBar(){
             )
             IconButton(
                 onClick = {
-
+                    mainScreenNavController.navigate(SMS.route)
                 }
             ) {
                 Image(

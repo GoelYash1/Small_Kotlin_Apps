@@ -27,3 +27,9 @@ object Transactions: Destinations{
     override val icon = R.drawable.ic_transactions
     override val title = "Transactions"
 }
+
+object SMS: Destinations{
+    override val route = "SMS"
+    override val icon = R.drawable.ic_sms
+    override val title = "SMS"
+}
