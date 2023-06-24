@@ -1,4 +1,4 @@
-package com.example.expensetracker.presentation.onBoardingScreen
+package com.example.expensetracker.Screens.onBoardingScreen
 
 import com.example.expensetracker.R
 

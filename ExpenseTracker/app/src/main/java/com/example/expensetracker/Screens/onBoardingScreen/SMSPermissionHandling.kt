@@ -1,4 +1,4 @@
-package com.example.expensetracker.presentation.onBoardingScreen
+package com.example.expensetracker.Screens.onBoardingScreen
 
 import android.Manifest
 import android.content.Context
@@ -14,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color

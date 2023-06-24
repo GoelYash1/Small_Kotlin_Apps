@@ -1,4 +1,4 @@
-package com.example.expensetracker.dtos
+package com.example.expensetracker.data.dtos
 
 data class SMSMessageDTO(
     val address: String,

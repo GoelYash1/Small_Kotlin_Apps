@@ -1,4 +1,4 @@
-package com.example.expensetracker.presentation.mainScreen
+package com.example.expensetracker.Screens.mainScreen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,9 +16,9 @@ import com.example.expensetracker.MainBottomNavigation
 import com.example.expensetracker.MainTopBar
 import com.example.expensetracker.SMS
 import com.example.expensetracker.Transactions
-import com.example.expensetracker.presentation.mainScreen.homeScreen.HomeScreen
-import com.example.expensetracker.presentation.mainScreen.transactions.TransactionScreen
-import com.example.expensetracker.presentation.sms.SMS
+import com.example.expensetracker.Screens.mainScreen.homeScreen.HomeScreen
+import com.example.expensetracker.Screens.mainScreen.transactions.TransactionScreen
+import com.example.expensetracker.Screens.sms.SMS
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

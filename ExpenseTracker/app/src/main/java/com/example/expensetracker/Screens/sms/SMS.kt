@@ -1,4 +1,4 @@
-package com.example.expensetracker.presentation.sms
+package com.example.expensetracker.Screens.sms
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -22,13 +23,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.expensetracker.api.SMSReadAPI
+import com.example.expensetracker.helper.TransactionSMSFilter
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
-import java.time.Year
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -36,20 +35,16 @@ import java.util.Locale
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SMS() {
-    val year = 2023
-    val month = Month.MAY
-    val startOfMonth = LocalDate.of(year, month, 1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
-    val endOfMonth = LocalDate.of(year, month, Month.of(month.value).length(Year.isLeap(year.toLong()))).atTime(23, 59, 59)
-        .toInstant(ZoneOffset.UTC).toEpochMilli()
+    val contentResolver = LocalContext.current.contentResolver
+    val smsReadAPI = SMSReadAPI(contentResolver)
+    val groupedSMS = smsReadAPI.getGroupedSMSMessagesByDate(year = 2023, month = Month.MAY)
 
-    val allSMSMessages =
-        SMSReadAPI(LocalContext.current.contentResolver).getAllSms(startOfMonth, endOfMonth)
+    val transactionSMSFilter = TransactionSMSFilter()
 
-    // Group messages by date
-    val groupedSMS = allSMSMessages.groupBy {
-        val localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(it.time), ZoneId.systemDefault())
-        val formattedDate = localDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault()))
-        formattedDate
+    val filteredSMS = remember(groupedSMS) {
+        groupedSMS.mapValues { (_, messages) ->
+            messages.filter { transactionSMSFilter.isExpense(it.body) || transactionSMSFilter.isIncome(it.body) }
+        }.filterValues { it.isNotEmpty() } // Filter out empty lists
     }
 
     LazyColumn(
@@ -57,7 +52,7 @@ fun SMS() {
             .fillMaxSize()
             .padding(20.dp)
     ) {
-        groupedSMS.forEach { (date, messages) ->
+        filteredSMS.forEach { (date, messages) ->
             stickyHeader {
                 Text(
                     text = date,
@@ -93,6 +88,8 @@ fun SMS() {
         }
     }
 }
+
+
 
 
 

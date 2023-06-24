@@ -1,4 +1,4 @@
-package com.example.expensetracker.presentation.onBoardingScreen
+package com.example.expensetracker.Screens.onBoardingScreen
 
 import android.content.Context
 import androidx.compose.foundation.Image
@@ -32,7 +32,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.expensetracker.Home
 
 @Composable
 fun OnBoardingScreen(

@@ -1,4 +1,4 @@
-package com.example.expensetracker.presentation.mainScreen.homeScreen
+package com.example.expensetracker.Screens.mainScreen.homeScreen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
