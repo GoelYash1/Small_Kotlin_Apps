@@ -1,4 +1,4 @@
-package com.example.expensetracker.Screens.sms
+package com.example.expensetracker.screens.mainScreen.transactions
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -31,13 +31,13 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SMS() {
+fun TransactionScreen(){
     val contentResolver = LocalContext.current.contentResolver
     val smsReadAPI = SMSReadAPI(contentResolver)
-    val groupedSMS = smsReadAPI.getGroupedSMSMessagesByDate(year = 2023, month = Month.MAY)
+    val groupedSMS = smsReadAPI.getGroupedSMSMessagesByDate(year = 2023, month = Month.FEBRUARY)
 
     val transactionSMSFilter = TransactionSMSFilter()
 
@@ -88,9 +88,3 @@ fun SMS() {
         }
     }
 }
-
-
-
-
-
-

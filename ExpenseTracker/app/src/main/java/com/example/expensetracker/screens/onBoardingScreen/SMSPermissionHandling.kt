@@ -1,4 +1,4 @@
-package com.example.expensetracker.Screens.onBoardingScreen
+package com.example.expensetracker.screens.onBoardingScreen
 
 import android.Manifest
 import android.content.Context

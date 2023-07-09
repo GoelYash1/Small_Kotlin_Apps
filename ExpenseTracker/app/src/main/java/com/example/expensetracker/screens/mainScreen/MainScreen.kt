@@ -1,5 +1,7 @@
-package com.example.expensetracker.Screens.mainScreen
+package com.example.expensetracker.screens.mainScreen
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -14,12 +16,13 @@ import androidx.navigation.compose.rememberNavController
 import com.example.expensetracker.Home
 import com.example.expensetracker.MainBottomNavigation
 import com.example.expensetracker.MainTopBar
-import com.example.expensetracker.SMS
+import com.example.expensetracker.Notification
 import com.example.expensetracker.Transactions
-import com.example.expensetracker.Screens.mainScreen.homeScreen.HomeScreen
-import com.example.expensetracker.Screens.mainScreen.transactions.TransactionScreen
-import com.example.expensetracker.Screens.sms.SMS
+import com.example.expensetracker.screens.mainScreen.homeScreen.HomeScreen
+import com.example.expensetracker.screens.mainScreen.transactions.TransactionScreen
+import com.example.expensetracker.screens.notifications.NotificationScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(){
@@ -42,6 +45,7 @@ fun MainScreen(){
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeNavigation(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Home.route){
@@ -51,8 +55,8 @@ fun HomeNavigation(navController: NavHostController) {
         composable(Transactions.route){
             TransactionScreen()
         }
-        composable(SMS.route){
-            SMS()
+        composable(Notification.route){
+            NotificationScreen()
         }
     }
 }

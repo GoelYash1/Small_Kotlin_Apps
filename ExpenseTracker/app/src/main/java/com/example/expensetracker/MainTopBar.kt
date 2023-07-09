@@ -42,11 +42,11 @@ fun MainTopBar(mainScreenNavController: NavHostController){
             )
             IconButton(
                 onClick = {
-                    mainScreenNavController.navigate(SMS.route)
+                    mainScreenNavController.navigate(Notification.route)
                 }
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_sms),
+                    painter = painterResource(id = R.drawable.ic_notifications),
                     contentDescription = "Notifications Screen"
                 )
             }
