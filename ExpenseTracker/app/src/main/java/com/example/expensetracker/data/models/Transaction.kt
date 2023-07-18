@@ -8,14 +8,12 @@ import androidx.room.PrimaryKey
 data class Transaction(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val title: String,
+    val title: String?,
     val amount: Double,
     val type: String,
-    val from: String?,
-    val to: String?,
     @ColumnInfo(name = "category_name")
-    val categoryName: Long,
+    val categoryName: String?,
     @ColumnInfo(name = "account_id")
-    val accountId: Long?,
+    val accountId: String?,
     val timestamp: Long
 )

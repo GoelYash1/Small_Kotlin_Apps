@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.expensetracker.data.dtos.SMSMessageDTO
+import com.example.expensetracker.helper.TransactionSMSFilter
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.Month
@@ -35,13 +36,20 @@ class SMSReadAPI(private val contentResolver: ContentResolver) {
             val body = cursor.getString(cursor.getColumnIndexOrThrow("body"))
             val time = cursor.getLong(cursor.getColumnIndexOrThrow("date"))
 
-            smsMessages.add(SMSMessageDTO(address, body, time))
+            val amountSpent = TransactionSMSFilter().getAmountSpent(body)
+            val isExpense = TransactionSMSFilter().isExpense(body)
+            val isIncome = TransactionSMSFilter().isIncome(body)
+
+            if (amountSpent != null && (isExpense || isIncome)) {
+                smsMessages.add(SMSMessageDTO(address, body, time))
+            }
         }
 
         cursor.close()
 
         return smsMessages
     }
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun getGroupedSMSMessagesByDate(year: Int? = null, month: Month? = null, date: Int? = null): Map<String, List<SMSMessageDTO>> {
         val startDateTime: LocalDateTime

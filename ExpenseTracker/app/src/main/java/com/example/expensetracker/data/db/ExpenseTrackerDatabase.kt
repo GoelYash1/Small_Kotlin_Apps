@@ -5,14 +5,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.expensetracker.data.daos.AccountDao
+import com.example.expensetracker.data.daos.MonthlyBudgetDao
 import com.example.expensetracker.data.daos.TransactionDao
 import com.example.expensetracker.data.models.Account
+import com.example.expensetracker.data.models.MonthlyBudget
 import com.example.expensetracker.data.models.Transaction
 
-@Database(entities = [Transaction::class, Account::class], version = 1)
+@Database(entities = [Transaction::class, Account::class, MonthlyBudget::class], version = 1)
 abstract class ExpenseTrackerDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao
     abstract fun accountDao(): AccountDao
+    abstract fun monthlyBudgetDao(): MonthlyBudgetDao
 
     companion object {
         private const val DATABASE_NAME = "expense_tracker_database"

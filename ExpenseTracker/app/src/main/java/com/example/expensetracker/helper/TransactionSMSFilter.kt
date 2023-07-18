@@ -4,40 +4,46 @@ import java.util.regex.Pattern
 
 class TransactionSMSFilter {
     companion object {
-        const val DEBIT_PATTERN = "debited|debit|deducted"
-        const val MISC_PATTERN = "payment|spent|paying|sent|UPI"
-        const val CREDIT_PATTERN = "credited | credit | added"
+        private const val DEBIT_PATTERN = "debited|debit|deducted"
+        private const val MISC_PATTERN = "payment|spent|paying|sent|UPI"
+        private const val CREDIT_PATTERN = "credited"
 
-        private val IGNORED_WORDS = listOf("redeem", "offer", "rewards", "voucher", "win", "congratulations", "getting")
+        private val IGNORED_WORDS = listOf("redeem", "offer", "rewards", "voucher", "win", "congratulations", "getting","congrats")
+        private const val ACCOUNT_PATTERN = "[Aa]ccount|/[Cc]|\\b[Cc][Aa][Rr][Dd]\\b"
+        private const val FROM_PATTERN = "by a/c linked"
+        private const val TO_PATTERN = "to VPA"
     }
 
     fun isExpense(message: String): Boolean {
         val regex =
-            "(?=.*[Aa]ccount.*|.*[Aa]/[Cc].*|.*[Aa][Cc][Cc][Tt].*|.*[Cc][Aa][Rr][Dd].*)(?=.*[Dd]ebit.*)(?=.*[Ii][Nn][Rr].*|.*[Rr][Ss].*)"
+            "(?=.*$ACCOUNT_PATTERN)(?=.*$DEBIT_PATTERN)(?=.*[Ii][Nn][Rr].*|.*[Rr][Ss].*)"
         return !containsIgnoredWords(message)
-                && (Pattern.compile(regex).matcher(message).find()
-                || DEBIT_PATTERN.toRegex().containsMatchIn(message.lowercase())
-                || MISC_PATTERN.toRegex().containsMatchIn(message.lowercase()))
+                && (Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(message).find()
+                || DEBIT_PATTERN.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(message)
+                || MISC_PATTERN.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(message))
     }
 
     fun getAmountSpent(message: String): Double? {
-        val regex = "(?i)(?:RS|INR|MRP)\\.?\\s?(\\d+(:?,\\d+)?(,\\d+)?(\\.\\d{1,2})?)"
-
-        val matchGroup = Regex(regex).find(message)?.groups?.firstOrNull()
-        return matchGroup?.value?.lowercase()
-            ?.replace("inr.", "")?.replace("inr", "")
-            ?.replace("mrp", "")
-            ?.replace("rs.", "")?.replace("rs", "")
-            ?.replace(",", "")?.trim()?.toDoubleOrNull()
+        val regex = "(?i)(?:RS|INR|MRP)\\.?\\s?(\\d{1,3}(?:,\\d{3})*(?:\\.\\d{1,2})?)"
+        val matchResult = regex.toRegex().find(message)
+        val matchValue = matchResult?.groupValues?.getOrNull(1)
+        return matchValue?.replace(",", "")?.toDoubleOrNull()
     }
+
 
     fun isIncome(message: String): Boolean {
         val regex =
-            "(?=.*[Aa]ccount.*|.*[Aa]/[Cc].*|.*[Aa][Cc][Cc][Tt].*|.*[Cc][Aa][Rr][Dd].*)(?=.*[Cc]redit.*)(?=.*[Ii][Nn][Rr].*|.*[Rr][Ss].*)"
+            "(?=.*$ACCOUNT_PATTERN)(?=.*$CREDIT_PATTERN)(?=.*[Ii][Nn][Rr].*|.*[Rr][Ss].*)"
         return !containsIgnoredWords(message)
-                && (Pattern.compile(regex).matcher(message).find()
-                || CREDIT_PATTERN.toRegex().containsMatchIn(message.lowercase())
-                || MISC_PATTERN.toRegex().containsMatchIn(message.lowercase()))
+                && (Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(message).find()
+                || CREDIT_PATTERN.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(message)
+                || MISC_PATTERN.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(message))
+    }
+
+    fun extractAccount(message: String): String? {
+        val regex = "'(?i)\\b$FROM_PATTERN\\b(\\w+)' || '(?i)\\b$TO_PATTERN\\b(\\w+)'"
+        val matchResult = regex.toRegex().find(message)
+        return matchResult?.groupValues?.get(1)
     }
 
     private fun containsIgnoredWords(message: String): Boolean {

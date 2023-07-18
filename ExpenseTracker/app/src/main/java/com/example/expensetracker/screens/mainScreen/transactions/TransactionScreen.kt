@@ -37,22 +37,14 @@ import java.util.Locale
 fun TransactionScreen(){
     val contentResolver = LocalContext.current.contentResolver
     val smsReadAPI = SMSReadAPI(contentResolver)
-    val groupedSMS = smsReadAPI.getGroupedSMSMessagesByDate(year = 2023, month = Month.FEBRUARY)
-
-    val transactionSMSFilter = TransactionSMSFilter()
-
-    val filteredSMS = remember(groupedSMS) {
-        groupedSMS.mapValues { (_, messages) ->
-            messages.filter { transactionSMSFilter.isExpense(it.body) || transactionSMSFilter.isIncome(it.body) }
-        }.filterValues { it.isNotEmpty() } // Filter out empty lists
-    }
+    val transactionSMS = smsReadAPI.getGroupedSMSMessagesByDate()
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp)
     ) {
-        filteredSMS.forEach { (date, messages) ->
+        transactionSMS.forEach { (date, messages) ->
             stickyHeader {
                 Text(
                     text = date,
