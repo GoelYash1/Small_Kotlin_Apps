@@ -21,11 +21,12 @@ import com.example.expensetracker.Transactions
 import com.example.expensetracker.screens.mainScreen.homeScreen.HomeScreen
 import com.example.expensetracker.screens.mainScreen.transactions.TransactionScreen
 import com.example.expensetracker.screens.notifications.NotificationScreen
+import com.example.expensetracker.viewModels.ExpenseTrackerViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(){
+fun MainScreen(expenseTrackerViewModel: ExpenseTrackerViewModel) {
     val homeNavController  = rememberNavController()
     Scaffold(
         topBar = {
@@ -40,23 +41,26 @@ fun MainScreen(){
                 .fillMaxSize()
                 .padding(it)
         ) {
-            HomeNavigation(homeNavController)
+            HomeNavigation(homeNavController,expenseTrackerViewModel)
         }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeNavigation(navController: NavHostController) {
+fun HomeNavigation(
+    navController: NavHostController,
+    expenseTrackerViewModel: ExpenseTrackerViewModel
+) {
     NavHost(navController = navController, startDestination = Home.route){
         composable(Home.route){
-            HomeScreen()
+            HomeScreen(expenseTrackerViewModel)
         }
         composable(Transactions.route){
-            TransactionScreen()
+            TransactionScreen(expenseTrackerViewModel)
         }
         composable(Notification.route){
-            NotificationScreen()
+            NotificationScreen(expenseTrackerViewModel)
         }
     }
 }

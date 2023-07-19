@@ -13,6 +13,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,12 +21,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.expensetracker.screens.mainScreen.MainScreen
 import com.example.expensetracker.screens.onBoardingScreen.OnBoardingScreen
+import com.example.expensetracker.viewModels.ExpenseTrackerViewModel
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val expenseTrackerViewModel: ExpenseTrackerViewModel = viewModel()
             val onBoardingCompleted = remember {
                 mutableStateOf(
                     getSharedPreferences("MySharedPreferences", Context.MODE_PRIVATE)
@@ -42,7 +45,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            MainNavigation(mainNavController = mainNavController)
+            MainNavigation(mainNavController,expenseTrackerViewModel)
         }
     }
 }
@@ -51,7 +54,8 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainNavigation(
-    mainNavController: NavHostController
+    mainNavController: NavHostController,
+    expenseTrackerViewModel: ExpenseTrackerViewModel
 ) {
     val backStackEntry = mainNavController.currentBackStackEntryAsState()
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
@@ -83,7 +87,7 @@ fun MainNavigation(
             OnBoardingScreen(mainNavController)
         }
         composable(Main.route) {
-            MainScreen()
+            MainScreen(expenseTrackerViewModel)
         }
     }
 }

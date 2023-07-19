@@ -51,7 +51,7 @@ class SMSReadAPI(private val contentResolver: ContentResolver) {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getGroupedSMSMessagesByDate(year: Int? = null, month: Month? = null, date: Int? = null): Map<String, List<SMSMessageDTO>> {
+    fun getGroupedSMSMessagesByDateMonthYear(year: Int? = null, month: Month? = null, date: Int? = null): Map<String, List<SMSMessageDTO>> {
         val startDateTime: LocalDateTime
         val endDateTime: LocalDateTime
 

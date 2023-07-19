@@ -37,7 +37,7 @@ import java.util.Locale
 fun TransactionScreen(){
     val contentResolver = LocalContext.current.contentResolver
     val smsReadAPI = SMSReadAPI(contentResolver)
-    val transactionSMS = smsReadAPI.getGroupedSMSMessagesByDate()
+    val transactionSMS = smsReadAPI.getGroupedSMSMessagesByDateMonthYear()
 
     LazyColumn(
         modifier = Modifier

@@ -13,10 +13,12 @@ interface TransactionDao {
     suspend fun insert(transaction: List<Transaction>)
     @Delete
     suspend fun delete(transaction: Transaction)
+    @Update
+    suspend fun update(transaction: Transaction)
     @Query("SELECT * FROM transactions")
     suspend fun getAllTransactions(): List<Transaction>
     @Query("SELECT * FROM transactions WHERE category_name = :categoryName")
-    suspend fun getTransactionsForCategory(categoryName: Long): List<Transaction>
+    suspend fun getTransactionsForCategory(categoryName: String): List<Transaction>
 
     @Query("SELECT * FROM transactions WHERE timestamp >= :startTimestamp AND timestamp <= :endTimestamp")
     suspend fun getTransactionsForMonth(startTimestamp: Long, endTimestamp: Long): List<Transaction>
