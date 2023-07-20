@@ -5,7 +5,7 @@ import java.util.regex.Pattern
 class TransactionSMSFilter {
     companion object {
         private const val DEBIT_PATTERN = "debited|debit|deducted"
-        private const val MISC_PATTERN = "payment|spent|paying|sent|UPI"
+        private const val MISC_PATTERN = "payment|spent|paying|sent"
         private const val CREDIT_PATTERN = "credited"
 
         private val IGNORED_WORDS = listOf("redeem", "offer", "rewards", "voucher", "win", "congratulations", "getting","congrats")
@@ -36,12 +36,11 @@ class TransactionSMSFilter {
             "(?=.*$ACCOUNT_PATTERN)(?=.*$CREDIT_PATTERN)(?=.*[Ii][Nn][Rr].*|.*[Rr][Ss].*)"
         return !containsIgnoredWords(message)
                 && (Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(message).find()
-                || CREDIT_PATTERN.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(message)
-                || MISC_PATTERN.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(message))
+                || CREDIT_PATTERN.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(message))
     }
 
     fun extractAccount(message: String): String? {
-        val regex = "'(?i)\\b$FROM_PATTERN\\b(\\w+)' || '(?i)\\b$TO_PATTERN\\b(\\w+)'"
+        val regex = "(?i)\\b(?:$FROM_PATTERN|$TO_PATTERN)\\b(\\w+)"
         val matchResult = regex.toRegex().find(message)
         return matchResult?.groupValues?.get(1)
     }

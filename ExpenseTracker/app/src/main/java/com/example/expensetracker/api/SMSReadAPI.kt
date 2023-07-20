@@ -14,6 +14,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+
 class SMSReadAPI(private val contentResolver: ContentResolver) {
     private fun getAllSms(from: Long?, to: Long?): List<SMSMessageDTO> {
         val smsMessages = mutableListOf<SMSMessageDTO>()

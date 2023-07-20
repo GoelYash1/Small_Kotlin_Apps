@@ -6,14 +6,14 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "transactions")
 data class Transaction(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
+    @PrimaryKey
+    val timestamp: Long,
     val title: String?,
     val amount: Double,
     val type: String,
     @ColumnInfo(name = "category_name")
     val categoryName: String?,
     @ColumnInfo(name = "account_id")
-    val accountId: String?,
-    val timestamp: Long
+    val accountId: String?
 )
+

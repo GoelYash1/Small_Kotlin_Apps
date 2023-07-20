@@ -4,8 +4,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.expensetracker.api.SMSReadAPI
+import com.example.expensetracker.data.db.ExpenseTrackerDatabase
 import com.example.expensetracker.data.models.Transaction
 import com.example.expensetracker.data.repo.ExpenseTrackerRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.time.Month
 
@@ -13,25 +17,20 @@ import java.time.Month
 class ExpenseTrackerViewModel(
     private val repository: ExpenseTrackerRepository
 ):ViewModel() {
-    init {
-        viewModelScope.launch {
-            repository.readAndStoreSMS()
-        }
-    }
     fun readAndStoreSMS(year:Int?=null, month:Month?=null, date:Int?=null){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO)  {
             repository.readAndStoreSMS(year,month,date)
         }
     }
-    suspend fun getAllTransactions(): List<Transaction> {
+    fun getAllTransactions(): Flow<List<Transaction>> {
         return repository.getAllTransactions()
     }
 
-    suspend fun getTransactionsForMonth(startTimestamp: Long, endTimestamp: Long): List<Transaction> {
+    fun getTransactionsForMonth(startTimestamp: Long, endTimestamp: Long): Flow<List<Transaction>> {
         return repository.getTransactionsForMonth(startTimestamp, endTimestamp)
     }
 
-    suspend fun getTransactionsForCategory(categoryName: String): List<Transaction> {
+    fun getTransactionsForCategory(categoryName: String): Flow<List<Transaction>> {
         return repository.getTransactionsForCategory(categoryName)
     }
     override fun onCleared() {

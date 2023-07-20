@@ -1,6 +1,8 @@
 package com.example.expensetracker
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -13,22 +15,32 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.expensetracker.api.SMSReadAPI
+import com.example.expensetracker.data.db.ExpenseTrackerDatabase
+import com.example.expensetracker.data.repo.ExpenseTrackerRepository
 import com.example.expensetracker.screens.mainScreen.MainScreen
 import com.example.expensetracker.screens.onBoardingScreen.OnBoardingScreen
 import com.example.expensetracker.viewModels.ExpenseTrackerViewModel
+import com.example.expensetracker.viewModels.ExpenseTrackerViewModelProviderFactory
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val expenseTrackerViewModel: ExpenseTrackerViewModel = viewModel()
+            val expenseTrackerRepository = ExpenseTrackerRepository(
+                ExpenseTrackerDatabase.getInstance(this),
+                applicationContext
+            )
+            val expenseTrackerViewModelProviderFactory = ExpenseTrackerViewModelProviderFactory(expenseTrackerRepository)
+            val expenseTrackerViewModel = ViewModelProvider(this,expenseTrackerViewModelProviderFactory)[ExpenseTrackerViewModel::class.java]
             val onBoardingCompleted = remember {
                 mutableStateOf(
                     getSharedPreferences("MySharedPreferences", Context.MODE_PRIVATE)

@@ -3,23 +3,29 @@ package com.example.expensetracker.data.daos
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.expensetracker.data.models.Transaction
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionDao {
-    @Insert
-    suspend fun insert(transaction: List<Transaction>)
-    @Delete
-    suspend fun delete(transaction: Transaction)
-    @Update
-    suspend fun update(transaction: Transaction)
-    @Query("SELECT * FROM transactions")
-    suspend fun getAllTransactions(): List<Transaction>
-    @Query("SELECT * FROM transactions WHERE category_name = :categoryName")
-    suspend fun getTransactionsForCategory(categoryName: String): List<Transaction>
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insert(transaction: Transaction)
 
-    @Query("SELECT * FROM transactions WHERE timestamp >= :startTimestamp AND timestamp <= :endTimestamp")
-    suspend fun getTransactionsForMonth(startTimestamp: Long, endTimestamp: Long): List<Transaction>
+    @Delete
+    fun delete(transaction: Transaction)
+
+    @Update
+    fun update(transaction: Transaction)
+
+    @Query("SELECT * FROM transactions ORDER BY timestamp DESC")
+    fun getAllTransactions(): Flow<List<Transaction>>
+
+    @Query("SELECT * FROM transactions WHERE category_name = :categoryName ORDER BY timestamp DESC")
+    fun getTransactionsForCategory(categoryName: String): Flow<List<Transaction>>
+
+    @Query("SELECT * FROM transactions WHERE timestamp >= :startTimestamp AND timestamp <= :endTimestamp ORDER BY timestamp DESC")
+    fun getTransactionsForMonth(startTimestamp: Long, endTimestamp: Long): Flow<List<Transaction>>
 }

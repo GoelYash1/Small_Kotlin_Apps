@@ -27,6 +27,7 @@ import com.example.expensetracker.viewModels.ExpenseTrackerViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(expenseTrackerViewModel: ExpenseTrackerViewModel) {
+    expenseTrackerViewModel.readAndStoreSMS()
     val homeNavController  = rememberNavController()
     Scaffold(
         topBar = {

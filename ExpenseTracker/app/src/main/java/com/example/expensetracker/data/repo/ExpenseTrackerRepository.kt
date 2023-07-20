@@ -1,76 +1,109 @@
 package com.example.expensetracker.data.repo
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import com.example.expensetracker.api.SMSReadAPI
 import com.example.expensetracker.data.db.ExpenseTrackerDatabase
-import com.example.expensetracker.data.models.Account
 import com.example.expensetracker.data.models.Transaction
+import com.example.expensetracker.data.models.TransactionCategories
 import com.example.expensetracker.helper.TransactionSMSFilter
+import kotlinx.coroutines.flow.Flow
 import java.time.Month
 
 class ExpenseTrackerRepository(
     private val db: ExpenseTrackerDatabase,
-    private val smsReadAPI: SMSReadAPI
+    private val context: Context
 ) {
     private val transactionDao = db.transactionDao()
     private val accountDao = db.accountDao()
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun readAndStoreSMS(year: Int? = null, month: Month? = null, date: Int? = null) {
-        val smsMessages = smsReadAPI.getGroupedSMSMessagesByDateMonthYear(year, month, date)
+        val smsReadAPI = if (checkSMSPermission()) SMSReadAPI(context.contentResolver) else null
 
-        val transactions = smsMessages.flatMap { (_, messages) ->
-            messages.map { sms ->
-                val amountSpent = TransactionSMSFilter().getAmountSpent(sms.body) ?: 0.0
-                val type = if (TransactionSMSFilter().isExpense(sms.body)) "Expense" else "Income"
-                val extractedAccount = TransactionSMSFilter().extractAccount(sms.body)
+        if (smsReadAPI != null) {
+            val smsMessages = smsReadAPI.getGroupedSMSMessagesByDateMonthYear(year, month, date)
 
-                val account = extractedAccount?.let { accountDao.getAccountByAccountId(it) }
+            smsMessages.flatMap { (_, messages) ->
+                messages.map { sms ->
+                    val transactionFilter = TransactionSMSFilter()
+                    val amountSpent = transactionFilter.getAmountSpent(sms.body) ?: 0.0
+                    val isExpense = transactionFilter.isExpense(sms.body)
+                    val extractedAccount = transactionFilter.extractAccount(sms.body)
 
-                if (account == null) {
-                    // Account is not present, ask the user to store the account and its details
-                    // and then create a new account entry in the database
-                    // You can prompt the user for default title and category selection here
-                    val newAccount = extractedAccount?.let {
-                        Account(
-                            accountId = it,
-                            name = "", // Prompt the user for account name
-                            defaultTitle = "", // Prompt the user for default title
-                            defaultCategoryName = "" // Prompt the user for default category
-                        )
+                    val defaultTitle: String?
+                    val defaultCategoryName: String?
+
+                    val account = extractedAccount?.let { accountDao.getAccountByAccountId(it) }
+                    if (account == null) {
+                        // Account is not present, prompt the user to store the account and its details
+                        // You can implement the prompt logic here
+
+                        // Set default values
+                        defaultTitle = "What was the payment for?"
+                        defaultCategoryName = TransactionCategories.OTHERS
+                    } else {
+                        defaultTitle = account.defaultTitle
+                        defaultCategoryName = account.defaultCategoryName
                     }
-                    if (newAccount != null) {
-                        accountDao.insert(newAccount)
-                    }
+
+                    val transaction = Transaction(
+                        title = defaultTitle,
+                        amount = amountSpent,
+                        timestamp = sms.time,
+                        type = if (isExpense) "Expense" else "Income",
+                        categoryName = defaultCategoryName,
+                        accountId = extractedAccount
+                    )
+
+                    transactionDao.insert(transaction)
                 }
-
-                val defaultTitle = account?.defaultTitle
-                val defaultCategoryName = account?.defaultCategoryName
-
-                Transaction(
-                    title = defaultTitle ?: "What is the Transaction For",
-                    amount = amountSpent,
-                    timestamp = sms.time,
-                    type = type,
-                    categoryName = defaultCategoryName,
-                    accountId = extractedAccount
-                )
             }
+        } else {
+            return
         }
+    }
+    suspend fun addManualTransaction(
+        title: String,
+        amount: Double,
+        timestamp: Long,
+        type: String, // "Expense" or "Income"
+        categoryName: String,
+        accountId: String? = null // Only needed if there's an associated account
+    ) {
+        val transaction = Transaction(
+            title = title,
+            amount = amount,
+            timestamp = timestamp,
+            type = type,
+            categoryName = categoryName,
+            accountId = accountId
+        )
 
-        transactionDao.insert(transactions)
+        transactionDao.insert(transaction)
     }
 
-    suspend fun getAllTransactions(): List<Transaction> {
+    private fun checkSMSPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.READ_SMS
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun getAllTransactions(): Flow<List<Transaction>> {
         return transactionDao.getAllTransactions()
     }
 
-    suspend fun getTransactionsForMonth(startTimestamp: Long, endTimestamp: Long): List<Transaction> {
+    fun getTransactionsForMonth(startTimestamp: Long, endTimestamp: Long): Flow<List<Transaction>> {
         return transactionDao.getTransactionsForMonth(startTimestamp, endTimestamp)
     }
 
-    suspend fun getTransactionsForCategory(categoryName: String): List<Transaction> {
+    fun getTransactionsForCategory(categoryName: String): Flow<List<Transaction>> {
         return transactionDao.getTransactionsForCategory(categoryName)
     }
 }
