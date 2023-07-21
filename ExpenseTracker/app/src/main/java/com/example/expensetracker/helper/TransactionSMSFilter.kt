@@ -10,8 +10,8 @@ class TransactionSMSFilter {
 
         private val IGNORED_WORDS = listOf("redeem", "offer", "rewards", "voucher", "win", "congratulations", "getting","congrats")
         private const val ACCOUNT_PATTERN = "[Aa]ccount|/[Cc]|\\b[Cc][Aa][Rr][Dd]\\b"
-        private const val FROM_PATTERN = "by a/c linked"
-        private const val TO_PATTERN = "to VPA"
+        private const val ACCOUNT_ID_PATTERN = "(?i)\\bVPA\\s*(\\S+?)\\s*\\(UPI Ref No\\b"
+
     }
 
     fun isExpense(message: String): Boolean {
@@ -24,7 +24,7 @@ class TransactionSMSFilter {
     }
 
     fun getAmountSpent(message: String): Double? {
-        val regex = "(?i)(?:RS|INR|MRP)\\.?\\s?(\\d{1,3}(?:,\\d{3})*(?:\\.\\d{1,2})?)"
+        val regex = "(?i)(?:RS|INR|MRP)\\.?\\s?(\\d{1,10}(?:,\\d{3})*(?:\\.\\d{1,2})?)"
         val matchResult = regex.toRegex().find(message)
         val matchValue = matchResult?.groupValues?.getOrNull(1)
         return matchValue?.replace(",", "")?.toDoubleOrNull()
@@ -40,9 +40,9 @@ class TransactionSMSFilter {
     }
 
     fun extractAccount(message: String): String? {
-        val regex = "(?i)\\b(?:$FROM_PATTERN|$TO_PATTERN)\\b(\\w+)"
-        val matchResult = regex.toRegex().find(message)
-        return matchResult?.groupValues?.get(1)
+        val regex = ACCOUNT_ID_PATTERN.toRegex()
+        val matchResult = regex.find(message)
+        return matchResult?.groupValues?.getOrNull(1)
     }
 
     private fun containsIgnoredWords(message: String): Boolean {
