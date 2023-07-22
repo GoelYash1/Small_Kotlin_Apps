@@ -27,5 +27,5 @@ interface TransactionDao {
     fun getTransactionsForCategory(categoryName: String): Flow<List<Transaction>>
 
     @Query("SELECT * FROM transactions WHERE timestamp >= :startTimestamp AND timestamp <= :endTimestamp ORDER BY timestamp DESC")
-    fun getTransactionsForMonth(startTimestamp: Long, endTimestamp: Long): Flow<List<Transaction>>
+    fun getTransactionsForTimePeriod(startTimestamp: Long, endTimestamp: Long): Flow<List<Transaction>>
 }

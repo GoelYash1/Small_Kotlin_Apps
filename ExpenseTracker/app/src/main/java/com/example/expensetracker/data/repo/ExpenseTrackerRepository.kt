@@ -83,8 +83,8 @@ class ExpenseTrackerRepository(
         return transactionDao.getAllTransactions()
     }
 
-    fun getTransactionsForMonth(startTimestamp: Long, endTimestamp: Long): Flow<List<Transaction>> {
-        return transactionDao.getTransactionsForMonth(startTimestamp, endTimestamp)
+    fun getTransactionsForTimePeriod(startTimestamp: Long, endTimestamp: Long): Flow<List<Transaction>> {
+        return transactionDao.getTransactionsForTimePeriod(startTimestamp, endTimestamp)
     }
 
     fun getTransactionsForCategory(categoryName: String): Flow<List<Transaction>> {
