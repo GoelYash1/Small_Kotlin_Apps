@@ -2,20 +2,30 @@ package com.example.expensetracker.screens.mainScreen.transactions
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Surface
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,10 +34,15 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.expensetracker.data.models.Transaction
+import com.example.expensetracker.data.models.TransactionCategories
 import com.example.expensetracker.helper.Resource
 import com.example.expensetracker.viewModels.ExpenseTrackerViewModel
 import java.time.Instant
@@ -36,25 +51,23 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TransactionScreen(expenseTrackerViewModel: ExpenseTrackerViewModel) {
     val resource by expenseTrackerViewModel.transactions.collectAsState()
     val isRefreshing by expenseTrackerViewModel.refreshing.observeAsState()
 
-    // Observe the refreshing state using snapshotFlow
     val swipeToRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing ?: false,
         onRefresh = { expenseTrackerViewModel.refreshTransactions() }
     )
 
-    Box(modifier = Modifier.pullRefresh(swipeToRefreshState).fillMaxWidth()) {
-        PullRefreshIndicator(
-            refreshing = isRefreshing ?: false,
-            state = swipeToRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
+    Box(
+        modifier = Modifier
+            .pullRefresh(swipeToRefreshState)
+            .fillMaxSize()
+    ) {
         // Display UI based on resource state
         when (resource) {
             is Resource.Loading -> {
@@ -69,46 +82,115 @@ fun TransactionScreen(expenseTrackerViewModel: ExpenseTrackerViewModel) {
 
             is Resource.Success -> {
                 val transactions = (resource as Resource.Success<List<Transaction>>).data
-                // Display success state UI with transactions
+
+                // Group transactions by dates
+                val transactionsByDates = transactions.groupBy { transaction ->
+                    val localDateTime = LocalDateTime.ofInstant(
+                        Instant.ofEpochMilli(transaction.timestamp),
+                        ZoneId.systemDefault()
+                    )
+                    localDateTime.toLocalDate() // Extract only the date part
+                }
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(20.dp)
+                        .padding(16.dp)
                 ) {
-                    items(transactions) { transaction ->
-                        Box(modifier = Modifier.padding(5.dp)) {
-                            Column {
-                                // Convert timestamp to readable format
-                                val localDateTime = LocalDateTime.ofInstant(
-                                    Instant.ofEpochMilli(transaction.timestamp),
-                                    ZoneId.systemDefault()
-                                )
-                                val formattedTime =
-                                    localDateTime.format(
-                                        DateTimeFormatter.ofPattern(
-                                            "HH:mm:ss",
-                                            Locale.getDefault()
+                    transactionsByDates.forEach { (date, transactionsForDate) ->
+                        stickyHeader {
+                            Text(
+                                text = date.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .padding(horizontal = 16.dp)
+                            )
+                        }
+                        items(transactionsForDate) { transaction ->
+                            val transactionTypeColor = if(transaction.type == "Expense") Color.Red else Color.Green
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .fillMaxWidth(),
+                                contentAlignment = Alignment.TopEnd
+                            ){
+                                Text(
+                                    text = transaction.type,
+                                    modifier = Modifier
+                                        .background(
+                                            transactionTypeColor,
+                                            RoundedCornerShape(topStart = 25.dp)
                                         )
-                                    )
-
-                                Text(
-                                    text = formattedTime,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 18.sp
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = transaction.title ?: "",
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 16.sp
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = transaction.amount.toString(),
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 16.sp
+                                        .padding(8.dp)
+                                    ,
+                                    color = Color.White,
+                                    fontSize = 12.sp
                                 )
                             }
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp),
+                                border = BorderStroke(0.2.dp, Color.Black)
+                            ){
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Show the icon associated with the category
+                                    val category =
+                                        TransactionCategories.categories.find { it.name == transaction.categoryName }
+                                    category?.let {
+                                        Icon(
+                                            painter = painterResource(id = it.iconResId),
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(start = 16.dp)
+                                    ) {
+                                        Text(
+                                            text = transaction.otherPartyName,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 16.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = transaction.title,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 14.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    Column {
+                                        Text(
+                                            text = transaction.amount.toString(),
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 16.sp,
+                                            color = if (transaction.amount >= 0) Color.Green else Color.Red
+                                        )
+                                        Text(
+                                            text = LocalDateTime.ofInstant(
+                                                Instant.ofEpochMilli(transaction.timestamp),
+                                                ZoneId.systemDefault()
+                                            ).format(DateTimeFormatter.ofPattern("HH:mm:ss")),
+                                            fontWeight = FontWeight.Light,
+                                            fontSize = 12.sp
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.padding(6.dp))
                         }
                     }
                 }
@@ -130,6 +212,13 @@ fun TransactionScreen(expenseTrackerViewModel: ExpenseTrackerViewModel) {
                 }
             }
         }
+
+        // Overlay the refresh indicator on top of everything
+        PullRefreshIndicator(
+            refreshing = isRefreshing ?: false,
+            state = swipeToRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }
 

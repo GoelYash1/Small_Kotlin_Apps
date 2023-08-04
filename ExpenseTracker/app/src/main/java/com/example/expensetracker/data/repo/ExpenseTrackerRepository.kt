@@ -26,7 +26,7 @@ class ExpenseTrackerRepository(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private suspend fun readSMSMessages(year: Int?, month: Month?, date: Int?): Map<String, List<SMSMessageDTO>> {
+    private fun readSMSMessages(year: Int?, month: Month?, date: Int?): Map<String, List<SMSMessageDTO>> {
         val smsReadAPI = SMSReadAPI(context.contentResolver)
         return smsReadAPI.getGroupedSMSMessagesByDateMonthYear(year, month, date)
     }
@@ -44,21 +44,25 @@ class ExpenseTrackerRepository(
 
                 val defaultTitle: String?
                 val defaultCategoryName: String?
+                val otherPartyName: String?
 
                 val account = extractedAccount?.let { db.accountDao().getAccountByAccountId(it) }
                 if (account == null) {
                     // Account is not present, implement the prompt logic here
 
                     // Set default values
+                    otherPartyName = if (isExpense) "To Whom?" else "From Whom?"
                     defaultTitle = "What was the payment for?"
                     defaultCategoryName = TransactionCategories.OTHERS
                 } else {
                     defaultTitle = account.defaultTitle
                     defaultCategoryName = account.defaultCategoryName
+                    otherPartyName = account.name
                 }
 
                 val transaction = Transaction(
                     title = defaultTitle,
+                    otherPartyName = otherPartyName,
                     amount = amountSpent,
                     timestamp = sms.time,
                     type = if (isExpense) "Expense" else "Income",
@@ -75,8 +79,15 @@ class ExpenseTrackerRepository(
 
     private fun storeTransactions(transactions: List<Transaction>) {
         transactions.forEach { transaction ->
-            transactionDao.insert(transaction)
+            transactionDao.insertTransaction(transaction)
         }
+    }
+
+    private fun deleteTransaction(transaction: Transaction){
+        transactionDao.deleteTransaction(transaction)
+    }
+    private fun updateTransaction(transaction: Transaction){
+        transactionDao.updateTransaction(transaction)
     }
 
     fun getAllTransactions(): Flow<List<Transaction>> {

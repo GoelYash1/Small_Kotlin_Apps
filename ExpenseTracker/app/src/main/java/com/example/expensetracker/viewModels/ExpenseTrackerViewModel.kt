@@ -28,22 +28,12 @@ class ExpenseTrackerViewModel(
     val transactions: StateFlow<Resource<List<Transaction>>>
         get() = _transactions
 
-    // Set the default polling interval to 30 minutes
-    private val defaultPollingInterval: Long = 30 * 60 * 1000 // 30 minutes in milliseconds
-
-    // MutableStateFlow to hold the polling interval set by the user
-    private val _pollingInterval = MutableStateFlow(defaultPollingInterval)
-    val pollingInterval: StateFlow<Long>
-        get() = _pollingInterval
-
     private val _refreshing = MutableLiveData<Boolean>()
     val refreshing: LiveData<Boolean> = _refreshing
 
     init {
         // Fetch and store all transactions when the ViewModel is initialized
         fetchAndStoreTransactions()
-        // Start the periodic polling
-        startPeriodicPolling(defaultPollingInterval)
     }
 
     private fun fetchAndStoreTransactions() {
@@ -60,14 +50,6 @@ class ExpenseTrackerViewModel(
         }
     }
 
-    private fun startPeriodicPolling(interval: Long) {
-        viewModelScope.launch {
-            while (true) {
-                delay(interval)
-                fetchAndStoreTransactions()
-            }
-        }
-    }
 
     // Function to manually trigger a refresh
     fun refreshTransactions() {
@@ -76,13 +58,6 @@ class ExpenseTrackerViewModel(
             fetchAndStoreTransactions()
             _refreshing.postValue(false)
         }
-    }
-
-    // Function to set the polling interval as per user input
-    fun setPollingInterval(interval: Long) {
-        _pollingInterval.value = interval
-        // Restart the periodic polling with the new interval
-        startPeriodicPolling(interval)
     }
 
     fun getTransactionsForMonthAndYear(year: Int, month: Month) {

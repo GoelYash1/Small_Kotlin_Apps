@@ -12,13 +12,13 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(transaction: Transaction)
+    fun insertTransaction(transaction: Transaction)
 
     @Delete
-    fun delete(transaction: Transaction)
+    fun deleteTransaction(transaction: Transaction)
 
     @Update
-    fun update(transaction: Transaction)
+    fun updateTransaction(transaction: Transaction)
 
     @Query("SELECT * FROM transactions ORDER BY timestamp DESC")
     fun getAllTransactions(): Flow<List<Transaction>>
