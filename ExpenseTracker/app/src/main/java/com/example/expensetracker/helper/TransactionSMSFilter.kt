@@ -5,10 +5,10 @@ import java.util.regex.Pattern
 class TransactionSMSFilter {
     companion object {
         private const val DEBIT_PATTERN = "debited|debit|deducted"
-        private const val MISC_PATTERN = "payment|spent|paying|sent"
+        private const val MISC_PATTERN = "spent|paying|sent"
         private const val CREDIT_PATTERN = "credited"
 
-        private val IGNORED_WORDS = listOf("redeem", "offer", "rewards", "voucher", "win", "congratulations", "getting","congrats","refunded")
+        private val IGNORED_WORDS = listOf("redeem", "offer", "rewards", "voucher", "win", "congratulations", "getting","congrats","refunded","OTP")
         private const val ACCOUNT_PATTERN = "[Aa]ccount|/[Cc]|\\b[Cc][Aa][Rr][Dd]\\b"
         private const val ACCOUNT_ID_PATTERN = "(?i)\\bVPA\\s*(\\S+?)\\s*\\(UPI Ref No\\b"
     }

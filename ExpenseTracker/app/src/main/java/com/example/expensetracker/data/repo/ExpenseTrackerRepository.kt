@@ -83,11 +83,11 @@ class ExpenseTrackerRepository(
         }
     }
 
-    private fun deleteTransaction(transaction: Transaction){
+    fun deleteTransaction(transaction: Transaction){
         transactionDao.deleteTransaction(transaction)
     }
-    private fun updateTransaction(transaction: Transaction){
-        transactionDao.updateTransaction(transaction)
+    fun editTransaction(transaction: Transaction){
+        transactionDao.editTransaction(transaction)
     }
 
     fun getAllTransactions(): Flow<List<Transaction>> {

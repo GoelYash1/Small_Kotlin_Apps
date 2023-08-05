@@ -18,7 +18,7 @@ interface TransactionDao {
     fun deleteTransaction(transaction: Transaction)
 
     @Update
-    fun updateTransaction(transaction: Transaction)
+    fun editTransaction(transaction: Transaction)
 
     @Query("SELECT * FROM transactions ORDER BY timestamp DESC")
     fun getAllTransactions(): Flow<List<Transaction>>

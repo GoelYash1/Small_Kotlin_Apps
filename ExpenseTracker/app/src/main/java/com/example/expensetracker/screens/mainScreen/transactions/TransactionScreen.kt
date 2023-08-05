@@ -135,60 +135,7 @@ fun TransactionScreen(expenseTrackerViewModel: ExpenseTrackerViewModel) {
                                     .padding(horizontal = 8.dp),
                                 border = BorderStroke(0.2.dp, Color.Black)
                             ){
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(10.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    // Show the icon associated with the category
-                                    val category =
-                                        TransactionCategories.categories.find { it.name == transaction.categoryName }
-                                    category?.let {
-                                        Icon(
-                                            painter = painterResource(id = it.iconResId),
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSurface,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                    }
-                                    Column(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(start = 16.dp)
-                                    ) {
-                                        Text(
-                                            text = transaction.otherPartyName,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 16.sp,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Text(
-                                            text = transaction.title,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 14.sp,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                    Column {
-                                        Text(
-                                            text = transaction.amount.toString(),
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 16.sp,
-                                            color = if (transaction.amount >= 0) Color.Green else Color.Red
-                                        )
-                                        Text(
-                                            text = LocalDateTime.ofInstant(
-                                                Instant.ofEpochMilli(transaction.timestamp),
-                                                ZoneId.systemDefault()
-                                            ).format(DateTimeFormatter.ofPattern("HH:mm:ss")),
-                                            fontWeight = FontWeight.Light,
-                                            fontSize = 12.sp
-                                        )
-                                    }
-                                }
+                                TransactionItemUI(transaction = transaction)
                             }
                             Spacer(modifier = Modifier.padding(6.dp))
                         }

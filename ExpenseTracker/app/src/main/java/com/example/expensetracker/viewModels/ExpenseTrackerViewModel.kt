@@ -112,6 +112,9 @@ class ExpenseTrackerViewModel(
         }
     }
 
+    fun editTransaction(transaction: Transaction){
+        
+    }
     fun getAllTransactions() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
