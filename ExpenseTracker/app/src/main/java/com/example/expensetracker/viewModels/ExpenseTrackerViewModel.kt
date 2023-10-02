@@ -33,14 +33,17 @@ class ExpenseTrackerViewModel(
 
     init {
         // Fetch and store all transactions when the ViewModel is initialized
-        fetchAndStoreTransactions()
+        fetchAndStoreTransactions(false)
     }
 
-    private fun fetchAndStoreTransactions() {
+    private fun fetchAndStoreTransactions(hasSMSPermission: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _transactions.value = Resource.Loading
-                repository.readAndStoreSMS()
+                if(hasSMSPermission)
+                {
+                    repository.readAndStoreSMS()
+                }
                 repository.getAllTransactions().collect {
                     _transactions.value = Resource.Success(it)
                 }
@@ -52,10 +55,10 @@ class ExpenseTrackerViewModel(
 
 
     // Function to manually trigger a refresh
-    fun refreshTransactions() {
+    fun refreshTransactions(hasSMSPermission: Boolean) {
         _refreshing.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            fetchAndStoreTransactions()
+            fetchAndStoreTransactions(hasSMSPermission)
             _refreshing.postValue(false)
         }
     }
@@ -102,25 +105,6 @@ class ExpenseTrackerViewModel(
                 // Start with loading state
                 _transactions.value = Resource.Loading
                 repository.getTransactionsForCategory(categoryName).collect {
-                    // Emit success state with data
-                    _transactions.value = Resource.Success(it)
-                }
-            } catch (e: Exception) {
-                // Handle error state
-                _transactions.value = Resource.Error(e)
-            }
-        }
-    }
-
-    fun editTransaction(transaction: Transaction){
-        
-    }
-    fun getAllTransactions() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                // Start with loading state
-                _transactions.value = Resource.Loading
-                repository.getAllTransactions().collect {
                     // Emit success state with data
                     _transactions.value = Resource.Success(it)
                 }
