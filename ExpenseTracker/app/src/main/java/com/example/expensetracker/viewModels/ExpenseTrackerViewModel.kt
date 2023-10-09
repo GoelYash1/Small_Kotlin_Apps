@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Month
+import java.time.Year
 import java.time.YearMonth
 import java.time.ZoneId
 
@@ -33,16 +34,16 @@ class ExpenseTrackerViewModel(
 
     init {
         // Fetch and store all transactions when the ViewModel is initialized
-        fetchAndStoreTransactions(false)
+        fetchAndStoreTransactions(false,Year.now().value,LocalDate.now().month)
     }
 
-    private fun fetchAndStoreTransactions(hasSMSPermission: Boolean) {
+    fun fetchAndStoreTransactions(hasSMSPermission: Boolean,year: Int = Year.now().value, month: Month? = null, date: Int? = null) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _transactions.value = Resource.Loading
                 if(hasSMSPermission)
                 {
-                    repository.readAndStoreSMS()
+                    repository.readAndStoreSMS(year,month,date)
                 }
                 repository.getAllTransactions().collect {
                     _transactions.value = Resource.Success(it)
@@ -55,15 +56,26 @@ class ExpenseTrackerViewModel(
 
 
     // Function to manually trigger a refresh
-    fun refreshTransactions(hasSMSPermission: Boolean) {
+    fun refreshTransactions(hasSMSPermission: Boolean,year: Int = Year.now().value, month: String = "All", date: Int? = null) {
         _refreshing.value = true
+        var selectedMonthEnum: Month = Month.JULY
+        var monthIsThere = false
+        if (month!="All"){
+            monthIsThere = true
+            selectedMonthEnum = month.let { Month.valueOf(it.toUpperCase()) }
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
-            fetchAndStoreTransactions(hasSMSPermission)
+            if (monthIsThere){
+                fetchAndStoreTransactions(hasSMSPermission,year,selectedMonthEnum,date)
+            } else {
+                fetchAndStoreTransactions(hasSMSPermission,year,date = date)
+            }
             _refreshing.postValue(false)
         }
     }
 
-    fun getTransactionsForMonthAndYear(year: Int, month: Month) {
+    fun getTransactionsForMonthAndYear(year:Int = Year.now().value, month: Month) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 // Start with loading state

@@ -11,6 +11,7 @@ import com.example.expensetracker.data.models.TransactionCategories
 import com.example.expensetracker.helper.TransactionSMSFilter
 import kotlinx.coroutines.flow.Flow
 import java.time.Month
+import java.time.Year
 
 class ExpenseTrackerRepository(
     private val db: ExpenseTrackerDatabase,
@@ -19,7 +20,7 @@ class ExpenseTrackerRepository(
     private val transactionDao = db.transactionDao()
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun readAndStoreSMS(year: Int? = null, month: Month? = null, date: Int? = null) {
+    suspend fun readAndStoreSMS(year: Int = Year.now().value, month: Month? = null, date: Int? = null) {
         val smsMessages = readSMSMessages(year, month, date)
         val transactions = processSMSMessages(smsMessages)
         storeTransactions(transactions)

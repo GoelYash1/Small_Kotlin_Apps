@@ -33,7 +33,11 @@ import com.example.expensetracker.data.models.Category
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropDownMenuUI(list: List<String>, title: String) {
+fun DropDownMenuUI(
+    list: List<String>,
+    title: String,
+    onItemSelected: (String) -> Unit
+) {
     var expanded by remember {
         mutableStateOf(false)
     }
@@ -41,7 +45,7 @@ fun DropDownMenuUI(list: List<String>, title: String) {
     val sharedPreferences = LocalContext.current.getSharedPreferences("MySharedPreferences", Context.MODE_PRIVATE)
 
     var selectedText by remember {
-        mutableStateOf(sharedPreferences.getString("selected$title",list[0])!!)
+        mutableStateOf(sharedPreferences.getString("selected$title", list[0])!!)
     }
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
@@ -59,8 +63,7 @@ fun DropDownMenuUI(list: List<String>, title: String) {
         shape = RoundedCornerShape(12.dp),
         enabled = false,
         trailingIcon = {
-            Icon(icon, contentDescription = title,
-                Modifier.clickable { expanded=!expanded })
+            Icon(icon, contentDescription = title, Modifier.clickable { expanded = !expanded })
         },
         textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp)
     )
@@ -70,19 +73,17 @@ fun DropDownMenuUI(list: List<String>, title: String) {
         onDismissRequest = { expanded = false },
         modifier = Modifier
             .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
-            .background(
-                MaterialTheme.colorScheme.surface
-            )
-
+            .background(MaterialTheme.colorScheme.surface)
     ) {
-        list.forEach{label->
+        list.forEach { label ->
             DropdownMenuItem(
                 onClick = {
-                    with(sharedPreferences.edit()){
-                        putString("selectedText",label).apply()
+                    with(sharedPreferences.edit()) {
+                        putString("selectedText", label).apply()
                     }
                     selectedText = label
                     expanded = false
+                    onItemSelected(label) // Notify the parent when an item is selected
                 }
             ) {
                 Text(
@@ -93,4 +94,5 @@ fun DropDownMenuUI(list: List<String>, title: String) {
         }
     }
 }
+
 
